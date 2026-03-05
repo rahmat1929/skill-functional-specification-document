@@ -9,7 +9,7 @@ Every generated FSD follows a structured 9-section template, uses MoSCoW priorit
 ## Installation
 
 ```bash
-npx skills add https://github.com/rahmat1929/skill-functional-specification-document --skill functional-specification-document
+npx skills add https://github.com/rahmat1929/skill-functional-specification-document-document --skill functional-specification-document
 ```
 
 ### Verify installation
