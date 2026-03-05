@@ -1,8 +1,23 @@
 # Functional Specification Document (FSD)
 
-A Cursor agent skill that generates comprehensive, implementation-ready Functional Specification Documents. It defines system functionality, business rules, user interactions, acceptance criteria, data models, and error handling — focusing on **what** the system must do, not how to build it.
+An agent skill that generates comprehensive, implementation-ready Functional Specification Documents. It defines system functionality, business rules, user interactions, acceptance criteria, and error handling — focusing on **what** the system must do and **why**, not how to build it.
 
-Every generated FSD follows a structured 9-section template, uses MoSCoW prioritization, GIVEN/WHEN/THEN acceptance criteria, and hierarchical requirement IDs (FR-X.Y.Z) for full traceability from spec to test to implementation.
+Every generated FSD follows a structured 8-section template with MoSCoW prioritization, GIVEN/WHEN/THEN acceptance criteria, hierarchical requirement IDs (FR-X.Y.Z), and Mermaid diagrams for all visual representations.
+
+---
+
+## Content Rules
+
+All generated FSDs follow these strict content rules:
+
+| Rule | Description |
+|------|-------------|
+| **No code samples** | Only explanations, conceptual descriptions, and structured information |
+| **No code blocks** | The only permitted fenced blocks are Mermaid diagrams |
+| **"What" and "why" focus** | Developer-friendly language focused on system behavior and business rationale |
+| **Architecture first** | Prioritize system relationships and module interactions over implementation details |
+| **Mermaid exclusively** | All diagrams (flowcharts, sequences, state machines) use Mermaid format |
+| **Exclude API & Database** | API endpoints and database schemas belong in separate companion documents |
 
 ---
 
@@ -12,13 +27,27 @@ Every generated FSD follows a structured 9-section template, uses MoSCoW priorit
 npx skills add https://github.com/rahmat1929/skill-functional-specification-document --skill functional-specification-document
 ```
 
+### Manual install
+
+Clone and copy to your preferred scope:
+
+| Scope | Path |
+|-------|------|
+| Project (shared) | `.agents/skills/functional-specification-document/` |
+| Personal (local) | `~/.cursor/skills/functional-specification-document/` |
+
+```bash
+git clone https://github.com/rahmat1929/skill-functional-specification-document.git
+cp -r skill-functional-specification-document/ .agents/skills/functional-specification-document/
+```
+
 ### Verify installation
 
-After installing, the skill should appear in Cursor's skill list. Test it by asking the agent:
+Ask the agent:
 
 > "Create a functional spec for the authentication module"
 
-If it responds by asking clarifying questions or generating an FSD, the skill is active.
+If it responds by asking clarifying questions or generating an FSD with Mermaid diagrams, the skill is active.
 
 ---
 
@@ -30,7 +59,7 @@ functional-specification-document/
 ├── README.md                       # This file
 ├── CHANGELOG.md                    # Version history
 ├── references/
-│   └── fsd-template.md             # Complete FSD template (9 sections) with examples
+│   └── fsd-template.md             # Complete FSD template (8 sections) with Mermaid examples
 └── scripts/
     └── validate_fsd.py             # Automated FSD structural validator
 ```
@@ -39,13 +68,11 @@ functional-specification-document/
 
 ## How It Works
 
-The skill follows a 4-phase workflow:
-
 | Phase | What happens |
 |-------|-------------|
 | **1. Gather Context** | Reads your PRD/brief or runs an interactive interview to understand the system |
-| **2. Write the FSD** | Generates a full document following the 9-section template with requirement IDs, acceptance criteria, and priority labels |
-| **3. Output & Validate** | Saves as `FSD-[Project-Name].md` and runs the validation script to check structural completeness |
+| **2. Write the FSD** | Generates a full document following the 8-section template with requirement IDs, acceptance criteria, priority labels, and Mermaid diagrams |
+| **3. Output & Validate** | Saves as `FSD-[Project-Name].md` and runs validation to check structure, content rules compliance, and Mermaid diagram presence |
 | **4. Review & Iterate** | Presents the draft with flagged assumptions, incorporates feedback, re-validates |
 
 ---
@@ -54,58 +81,35 @@ The skill follows a 4-phase workflow:
 
 ### Example 1: Interactive — Spec a new system from scratch
 
-Just describe what you want. The skill triggers automatically.
-
 **Prompt:**
 
 > I need a functional spec for a food delivery app. It should support customer ordering, restaurant management, and a driver tracking system.
 
-**What happens:**
-
-The agent starts an interview to gather context:
-
-> *"Got it — a food delivery platform with three user types. Let me understand the scope:*
-> 1. *Who are the user roles? (e.g., Customer, Restaurant Owner, Driver, Admin)*
-> 2. *What are the core workflows each role performs?"*
-
-You answer, it asks targeted follow-ups, and once it has enough context it generates the full FSD and saves it as `FSD-Food-Delivery-App.md`.
-
 **What you get:**
 
-- `FSD-Food-Delivery-App.md` with all 9 sections populated
+- `FSD-Food-Delivery-App.md` with all 8 sections populated
+- Mermaid sequence diagrams for key user flows (ordering, driver assignment, delivery tracking)
+- Mermaid state diagram for the order lifecycle
+- Mermaid flowchart for navigation and feature interactions
 - Requirement IDs: FR-3.1.1 (Customer Registration), FR-3.2.1 (Place Order), FR-3.3.1 (Driver Assignment), etc.
 - Use cases with main flow, alternative flows, and exception flows
-- Data model for Users, Restaurants, Orders, OrderItems, Drivers, DeliveryTracking
 - Error handling matrix for payment failures, GPS unavailability, restaurant rejection
-- NFRs with measurable targets (e.g., "order placement API responds within 300ms at p95")
-- Validation report confirming structural completeness
+- NFRs with measurable targets
+- No code blocks, no API specs, no database schemas — pure behavioral specification
 
 ---
 
 ### Example 2: From an existing PRD or brief
 
-Point the agent to a document you already have.
-
 **Prompt:**
 
 > Here's our PRD for the new inventory management system — `docs/PRD-Inventory-v2.md`. Can you turn this into a functional specification?
 
-**What happens:**
-
-The agent reads your PRD, extracts requirements, identifies gaps and ambiguities, and asks clarifying questions before generating the FSD:
-
-> *"I've read the PRD. A few things I need clarity on before writing the spec:*
-> 1. *Section 3.2 mentions 'role-based access' but doesn't list the roles — who are the user types?*
-> 2. *The PRD says 'real-time stock updates' — what's the acceptable latency? Sub-second? Under 5 seconds?*
-> 3. *Is the CSV export in Section 4.1 a one-time download or a scheduled recurring export?"*
-
-After you clarify, it generates a complete FSD grounded in your PRD's requirements.
+The agent reads your PRD, extracts requirements, identifies gaps, asks clarifying questions, then generates a complete FSD with Mermaid diagrams throughout.
 
 ---
 
 ### Example 3: Spec a single feature
-
-You don't need a whole product — the skill works for individual features too.
 
 **Prompt:**
 
@@ -113,56 +117,24 @@ You don't need a whole product — the skill works for individual features too.
 
 **What you get:**
 
-A focused FSD covering:
-- FR-3.1.1: Password reset request (email input, rate limiting)
-- FR-3.1.2: Reset token generation (expiry, single-use)
-- FR-3.1.3: Reset link delivery (email template, deep link for mobile)
-- FR-3.1.4: New password submission (complexity validation, session invalidation)
-- Use case with main flow + exception flows (invalid token, expired link, account lockout)
-- Error handling matrix for each failure scenario
-- Acceptance criteria in GIVEN/WHEN/THEN format for every requirement
+A focused FSD with Mermaid sequence diagram for the reset flow, state diagram for token lifecycle, requirement IDs, acceptance criteria, and error handling — all without a single line of code.
 
 ---
 
 ### Example 4: Casual phrasing (still triggers)
 
-You don't need to say "functional specification" — natural language works.
+> "Write up how the checkout flow should behave, step by step, with all the edge cases."
 
-**Prompt:**
+> "Document the requirements for our notification service."
 
-> Write up how the checkout flow should behave, step by step, with all the edge cases. I need something I can hand to the dev team.
-
-**Prompt:**
-
-> Can you document the requirements for our notification service? It needs to support email, SMS via Twilio, and push notifications via Firebase.
-
-**Prompt:**
-
-> Spec out the admin dashboard — user management, analytics, and content moderation.
-
-All of these trigger the skill and produce a structured FSD.
+> "Spec out the admin dashboard — user management, analytics, and content moderation."
 
 ---
 
 ### Example 5: Validate an existing FSD
 
-If you already have an FSD, you can validate it for structural completeness.
-
-**Prompt:**
-
-> Validate the FSD at `docs/FSD-Payment.md`
-
-**Or run the script directly:**
-
 ```bash
-# Standard validation
 python .agents/skills/functional-specification-document/scripts/validate_fsd.py docs/FSD-Payment.md
-
-# Strict mode — warnings become errors
-python .agents/skills/functional-specification-document/scripts/validate_fsd.py docs/FSD-Payment.md --strict
-
-# JSON output — for CI/CD pipelines
-python .agents/skills/functional-specification-document/scripts/validate_fsd.py docs/FSD-Payment.md --json
 ```
 
 **Sample output:**
@@ -177,72 +149,77 @@ python .agents/skills/functional-specification-document/scripts/validate_fsd.py 
   Warnings: 2
   Sections found: 32
   Requirement IDs found: 45
-
-------------------------------------------------------------
-  Issues
-------------------------------------------------------------
+  Mermaid diagrams: 8
 
   [WARNING] Cross-References
             ID "FR-3.4.2" is referenced but not formally defined
 
   [WARNING] Non-Functional Requirements
-            Vague term "fast" found — use measurable targets (e.g., "< 200ms")
-
-------------------------------------------------------------
-  Requirement IDs
-------------------------------------------------------------
-
-    FR-3.1.1, FR-3.1.2, FR-3.2.1, FR-3.2.2, FR-3.3.1 ... (45 total)
+            Vague term "fast" found — use measurable targets
 
 ============================================================
 ```
+
+Use `--strict` to treat warnings as errors, or `--json` for CI/CD integration.
 
 ---
 
 ## Output Document Structure
 
-Every generated FSD follows this 9-section structure:
-
 | # | Section | Contents |
 |---|---------|----------|
 | 1 | **Introduction** | Purpose, scope, definitions & acronyms, references, document conventions (SHALL/SHOULD/MAY) |
-| 2 | **Product Overview** | Product perspective, high-level functions, user classes, operating environment, constraints, assumptions & dependencies |
-| 3 | **Functional Requirements** | Feature breakdown with IDs (FR-X.Y.Z), descriptions, MoSCoW priority, acceptance criteria (GIVEN/WHEN/THEN), business rules; use cases with main/alternative/exception flows; input/output specifications |
-| 4 | **External Interface Requirements** | User interfaces, API/software interfaces, hardware interfaces, communication protocols |
-| 5 | **Data Requirements** | Data model/ERD, data dictionary (field-level definitions), data migration & seeding |
-| 6 | **Non-Functional Requirements** | Performance (with measurable targets), security, reliability & availability (RTO/RPO), scalability, maintainability, accessibility (WCAG) |
-| 7 | **System Behavior & Error Handling** | State diagrams, error handling matrix (code, condition, user message, system action, severity), edge cases & boundary conditions |
-| 8 | **Approval & Sign-Off** | Stakeholder sign-off table, revision history |
-| 9 | **Appendices** | Architecture diagrams, wireframes, API catalog, ERD, glossary |
+| 2 | **Product Overview** | Product perspective (with Mermaid context diagram), high-level functions, user classes, operating environment, constraints, assumptions & dependencies |
+| 3 | **Functional Requirements** | Feature breakdown with IDs (FR-X.Y.Z), descriptions, MoSCoW priority, acceptance criteria (GIVEN/WHEN/THEN), business rules; use cases with Mermaid sequence diagrams; feature interaction maps |
+| 4 | **User Interface Requirements** | Screen inventory, navigation flow (Mermaid flowchart), screen descriptions, accessibility requirements |
+| 5 | **Non-Functional Requirements** | Performance (measurable targets), security, reliability & availability (RTO/RPO), scalability, maintainability |
+| 6 | **System Behavior & Error Handling** | State diagrams (Mermaid stateDiagram), error handling matrix, edge cases, critical flow diagrams (Mermaid flowchart) |
+| 7 | **Approval & Sign-Off** | Stakeholder sign-off table, revision history |
+| 8 | **Appendices** | Supplementary Mermaid diagrams, wireframe references, glossary |
+
+**Excluded by design:** API endpoint catalogs, database schemas, data dictionaries — these belong in companion API Specification and Database Design documents.
 
 ---
 
 ## Validation Checks
 
-The `validate_fsd.py` script checks 9 categories:
-
 | Check | Severity | What it catches |
 |-------|----------|----------------|
-| Required sections | Error | Missing top-level sections (Introduction, Functional Requirements, etc.) |
-| Recommended subsections | Warning | Missing subsections (e.g., no "Security" under Non-Functional Requirements) |
-| Empty sections | Error | Sections with no content (only sub-headings or blank) |
+| Required sections | Error | Missing top-level sections from the 8-section structure |
+| Excluded sections | Error | API or database sections that shouldn't be in the FSD |
+| Recommended subsections | Warning | Missing subsections (e.g., no "Security" under NFRs) |
+| Empty sections | Error | Sections with no content |
+| Code block detection | Error | Non-Mermaid code blocks (violates content rules) |
+| Mermaid diagram presence | Warning | No Mermaid diagrams found |
 | Placeholder detection | Warning | TBD, TODO, TBC, [placeholder], Lorem ipsum |
-| Requirement ID format | Error | No requirement IDs, or IDs not following FR-X.Y.Z / NFR-X.Y.Z convention |
-| MoSCoW priorities | Error/Warning | Invalid priority labels or missing priorities entirely |
-| Acceptance criteria | Warning/Error | Functional requirements without GIVEN/WHEN/THEN criteria |
-| Cross-reference integrity | Warning | IDs referenced but never formally defined |
-| NFR measurability | Warning | Vague adjectives ("fast", "secure enough") instead of measurable targets |
+| Requirement ID format | Error | Missing IDs or wrong format |
+| MoSCoW priorities | Error/Warning | Invalid or missing priority labels |
+| Acceptance criteria | Warning/Error | Requirements without GIVEN/WHEN/THEN |
+| Cross-reference integrity | Warning | Referenced IDs never formally defined |
+| NFR measurability | Warning | Vague adjectives instead of measurable targets |
 
 ---
 
 ## Governance Rules
 
-- **Requirement IDs:** Hierarchical format — `FR-3.1.1`, `NFR-6.2.1`, `UC-3.2.1`, `BR-3.1.1a`
+- **Requirement IDs:** Hierarchical format — `FR-3.1.1`, `NFR-5.2.1`, `UC-3.2.1`, `BR-3.1.1a`, `UI-4.4.1`
 - **Priority:** Every requirement gets a MoSCoW label (Must / Should / Could / Won't)
 - **Acceptance Criteria:** Every Must/Should requirement has GIVEN/WHEN/THEN criteria
-- **Traceability:** Use cases reference FR IDs; error matrix references flows; data model covers all entities in requirements
-- **No scope creep:** Features outside stated scope are explicitly marked as Won't
+- **Diagrams:** All visual representations use Mermaid — no exceptions
+- **No code:** Zero code samples, zero code blocks (except Mermaid)
+- **Separation of concerns:** API specs and database schemas are referenced but never included
 - **Assumptions flagged:** Unclear business logic marked with `[ASSUMPTION]` for stakeholder review
+
+---
+
+## Companion Documents
+
+The FSD is one part of a complete specification pipeline. It references but does not include:
+
+| Document | What it covers | Relationship to FSD |
+|----------|---------------|-------------------|
+| **API Specification** | Endpoint contracts, request/response schemas, auth, versioning | Implements FSD's functional requirements as API contracts |
+| **Database Design** | Schema, migrations, indexing, ERD | Implements FSD's entity descriptions as database structures |
 
 ---
 

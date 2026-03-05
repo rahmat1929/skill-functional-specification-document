@@ -7,6 +7,17 @@ description: Generate a comprehensive Functional Specification Document (FSD) fr
 
 This skill produces structured, implementation-ready Functional Specification Documents. An FSD bridges the gap between what stakeholders want (captured in a PRD or brief) and what engineers need to build. It answers "what does the system do and how should it behave?" without dictating internal architecture.
 
+## Content Rules
+
+These rules govern every FSD this skill produces. Follow them strictly:
+
+- **NO CODE SAMPLES** — Provide only explanations, conceptual descriptions, and structured information. Never include source code, pseudo-code, or implementation snippets.
+- **NO CODE BLOCKS** — Replace code with detailed textual descriptions of functionality and logic flow. The only permitted fenced blocks are Mermaid diagrams.
+- **"What" and "why", not "how"** — Use clear, developer-friendly language that focuses on system behavior and business rationale, not implementation mechanics.
+- **Architectural understanding first** — Prioritize system relationships, module interactions, and data flow over technical details.
+- **Mermaid exclusively for visuals** — Use Mermaid format for all diagrams: flowcharts, sequence diagrams, state diagrams, entity relationships, and architecture overviews. No ASCII art, no plaintext diagrams, no embedded images.
+- **Exclude API & Database** — The FSD does not cover API endpoint specifications or database schema design. Those belong in separate API Specification and Database Design documents respectively. The FSD references them but does not define them.
+
 ## When to use this skill
 
 - A user wants to create a functional specification for a new product, feature, or system
@@ -29,7 +40,7 @@ Walk through these questions to build a mental model of the system:
 1. What is the product/feature? (one-sentence elevator pitch)
 2. Who are the users? (roles, personas, access levels)
 3. What are the core workflows? (the 3-5 things users will actually do)
-4. What systems does this interact with? (APIs, databases, third-party services)
+4. What external systems does this interact with? (third-party services, other internal modules)
 5. Are there constraints? (regulatory, platform, timeline, tech stack)
 6. What does success look like? (KPIs, acceptance criteria)
 
@@ -37,34 +48,23 @@ Don't ask all questions at once — use the first couple of answers to tailor fo
 
 ### Phase 2: Write the FSD
 
-Read `references/fsd-template.md` for the full document template and section-by-section guidance. Follow that template structure, but adapt it to the project — skip sections that genuinely don't apply (e.g., "Hardware Interfaces" for a pure web app) and expand sections that need more depth.
+Read `references/fsd-template.md` for the full document template and section-by-section guidance. Follow that template structure, but adapt it to the project — skip sections that genuinely don't apply and expand sections that need more depth.
 
 **Key principles while writing:**
 
 - **Be specific.** "The system should be fast" is not a requirement. "Search results return within 200ms for up to 10,000 records" is.
 - **Use consistent language.** "SHALL" = mandatory, "SHOULD" = recommended, "MAY" = optional. Define this in the Document Conventions section and stick to it.
 - **Every feature gets acceptance criteria.** If you can't write a test for it, the requirement isn't clear enough.
-- **Separate what from how.** Describe observable behavior, not implementation details. "The system SHALL authenticate users via OAuth 2.0" is fine (it's an interface contract). "The system SHALL use a HashMap to store session tokens" is not (that's an architecture decision).
+- **Describe behavior, not implementation.** State what the system does and why, never how it does it internally.
 - **Assign priority to each requirement.** Use MoSCoW: Must / Should / Could / Won't. This prevents scope creep and helps teams negotiate tradeoffs.
 - **Number every requirement.** Use a hierarchical ID scheme (e.g., FR-3.2.1) so requirements are traceable from spec to test to implementation.
+- **Use Mermaid for all diagrams.** State machines, user flows, system context, sequence diagrams — all in Mermaid format.
 
 ### Phase 3: Output
 
 Save the FSD as a Markdown file. Use the naming convention: `FSD-[Project-Name].md`
 
-After generating the document, run the validation script to check structural completeness:
-
-```bash
-python <skill-path>/scripts/validate_fsd.py <path-to-generated-fsd>
-```
-
-The validation script checks for:
-- Presence of all required sections
-- Requirement IDs follow the numbering convention
-- Every feature has acceptance criteria
-- Priority labels are valid MoSCoW values
-- No empty sections (placeholder-only content)
-- Cross-reference integrity (referenced IDs exist)
+After generating the document, run the validation script to check structural completeness. The script validates required sections, requirement ID format, acceptance criteria presence, MoSCoW labels, Mermaid diagram presence, and flags any code blocks that shouldn't be there.
 
 If validation reports issues, fix them before presenting the final document to the user. Show the user the validation summary alongside the finished document so they know it's been checked.
 
@@ -83,13 +83,12 @@ The full FSD follows this top-level structure (see `references/fsd-template.md` 
 
 1. **Introduction** — Purpose, scope, definitions, references, conventions
 2. **Product Overview** — Context, high-level functions, users, environment, constraints, assumptions
-3. **Functional Requirements** — Feature breakdown with IDs, descriptions, acceptance criteria, priority, business rules; use cases with flows; input/output specs
-4. **External Interface Requirements** — UI, API/software, hardware, communication interfaces
-5. **Data Requirements** — Data model, data dictionary, migration/seeding
-6. **Non-Functional Requirements** — Performance, security, reliability, scalability, maintainability, accessibility
-7. **System Behavior & Error Handling** — State transitions, error matrix, edge cases
-8. **Approval & Sign-Off** — Stakeholder table, revision history
-9. **Appendices** — Diagrams, mockups, supplementary material
+3. **Functional Requirements** — Feature breakdown with IDs, descriptions, acceptance criteria, priority, business rules; use cases with main/alternative/exception flows
+4. **User Interface Requirements** — Screen descriptions, interaction behavior, navigation, accessibility
+5. **Non-Functional Requirements** — Performance, security, reliability, scalability, maintainability, accessibility
+6. **System Behavior & Error Handling** — State transitions (Mermaid), error matrix, edge cases
+7. **Approval & Sign-Off** — Stakeholder table, revision history
+8. **Appendices** — Mermaid diagrams, supplementary material
 
 ## Output Quality Checklist
 
@@ -99,9 +98,11 @@ Before delivering the final FSD, mentally verify:
 - [ ] Every requirement has a priority (Must/Should/Could/Won't)
 - [ ] Every feature has testable acceptance criteria
 - [ ] Use cases cover main flow + at least one alternative/error flow
-- [ ] Data model covers all entities mentioned in the requirements
 - [ ] Error handling is specified for user-facing operations
 - [ ] Non-functional requirements have measurable targets (not vague adjectives)
 - [ ] No section is left as a placeholder or TODO
 - [ ] Cross-references between sections are consistent
+- [ ] All diagrams use Mermaid format (no code blocks, no ASCII art)
+- [ ] No code samples or code blocks appear anywhere in the document
+- [ ] No API endpoint definitions or database schemas are included
 - [ ] The document can be handed to a developer who has never seen the project and they could start building

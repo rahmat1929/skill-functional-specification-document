@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Validate a Functional Specification Document for structural completeness,
-requirement formatting, and cross-reference integrity.
+requirement formatting, content rules, and cross-reference integrity.
 
 Usage:
     python validate_fsd.py <path-to-fsd.md>
@@ -44,6 +44,8 @@ class ValidationResult:
     sections_found: list[str] = field(default_factory=list)
     requirement_ids: list[str] = field(default_factory=list)
     cross_references: list[str] = field(default_factory=list)
+    mermaid_count: int = 0
+    code_block_count: int = 0
 
     @property
     def error_count(self):
@@ -64,6 +66,8 @@ class ValidationResult:
             "warnings": self.warning_count,
             "sections_found": self.sections_found,
             "requirement_ids_found": len(self.requirement_ids),
+            "mermaid_diagrams": self.mermaid_count,
+            "code_blocks_found": self.code_block_count,
             "issues": [i.to_dict() for i in self.issues],
         }
 
@@ -72,8 +76,7 @@ REQUIRED_SECTIONS = [
     "Introduction",
     "Product Overview",
     "Functional Requirements",
-    "External Interface Requirements",
-    "Data Requirements",
+    "User Interface",
     "Non-Functional Requirements",
     "System Behavior",
     "Approval",
@@ -82,15 +85,26 @@ REQUIRED_SECTIONS = [
 RECOMMENDED_SUBSECTIONS = {
     "Introduction": ["Purpose", "Scope", "Definitions", "References", "Conventions"],
     "Product Overview": ["Product Perspective", "Product Functions", "User Classes", "Operating Environment", "Constraints", "Assumptions"],
-    "Functional Requirements": ["Feature", "Use Case", "Input"],
+    "Functional Requirements": ["Feature", "Use Case"],
     "Non-Functional Requirements": ["Performance", "Security", "Reliability", "Scalability"],
 }
 
+EXCLUDED_SECTIONS = [
+    "api",
+    "database",
+    "data requirements",
+    "data model",
+    "data dictionary",
+    "api specification",
+    "api endpoint",
+    "software interface",
+    "hardware interface",
+    "communication interface",
+]
+
 MOSCOW_VALUES = {"must", "should", "could", "won't", "wont", "will not"}
 
-REQ_ID_PATTERN = re.compile(r"\b(FR|NFR|UC|BR|IO|EI)-[\d]+(?:\.[\d]+)*\b")
-
-CROSS_REF_PATTERN = re.compile(r"\b(FR|NFR|UC|BR|IO|EI)-[\d]+(?:\.[\d]+)*\b")
+REQ_ID_PATTERN = re.compile(r"\b(FR|NFR|UC|BR|UI)-[\d]+(?:\.[\d]+)*\b")
 
 
 def read_document(path: Path) -> tuple[str, list[str]]:
@@ -100,13 +114,11 @@ def read_document(path: Path) -> tuple[str, list[str]]:
 
 
 def _heading_level(line: str) -> int:
-    """Return the heading level (1-6) for a markdown heading line, or 0 if not a heading."""
     match = re.match(r"^(#{1,6})\s+", line.strip())
     return len(match.group(1)) if match else 0
 
 
 def extract_sections(lines: list[str]) -> dict[str, tuple[int, int]]:
-    """Map all markdown headings to their line ranges (title -> (start_line, end_line))."""
     sections: dict[str, tuple[int, int]] = {}
     heading_positions: list[tuple[str, int]] = []
 
@@ -124,7 +136,6 @@ def extract_sections(lines: list[str]) -> dict[str, tuple[int, int]]:
 
 
 def extract_sections_hierarchical(lines: list[str]) -> dict[str, tuple[int, int]]:
-    """Map headings to ranges that include their child headings (up to the next sibling or parent)."""
     sections: dict[str, tuple[int, int]] = {}
     heading_positions: list[tuple[str, int, int]] = []
 
@@ -172,6 +183,20 @@ def check_required_sections(sections: dict[str, tuple[int, int]], result: Valida
                 ))
 
 
+def check_excluded_sections(sections: dict[str, tuple[int, int]], result: ValidationResult):
+    section_titles = list(sections.keys())
+    for title in section_titles:
+        title_lower = title.lower()
+        for excluded in EXCLUDED_SECTIONS:
+            if excluded in title_lower and "reference" not in title_lower:
+                result.issues.append(Issue(
+                    severity=Severity.ERROR,
+                    section=title,
+                    message=f'Section "{title}" should not be in the FSD — API and database specifications belong in separate documents',
+                ))
+                break
+
+
 def check_empty_sections(lines: list[str], result: ValidationResult):
     hier_sections = extract_sections_hierarchical(lines)
     for title, (start, end) in hier_sections.items():
@@ -199,9 +224,47 @@ def check_empty_sections(lines: list[str], result: ValidationResult):
                 ))
 
 
+def check_code_blocks(content: str, lines: list[str], result: ValidationResult):
+    mermaid_count = 0
+    code_block_count = 0
+    in_block = False
+    block_start = 0
+    is_mermaid = False
+
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith("```") and not in_block:
+            in_block = True
+            block_start = i
+            lang = stripped[3:].strip().lower()
+            is_mermaid = lang == "mermaid"
+            if is_mermaid:
+                mermaid_count += 1
+            else:
+                code_block_count += 1
+        elif stripped == "```" and in_block:
+            if not is_mermaid:
+                result.issues.append(Issue(
+                    severity=Severity.ERROR,
+                    section="Content Rules",
+                    message=f"Non-Mermaid code block found — the FSD must not contain code samples or code blocks",
+                    line=block_start + 1,
+                ))
+            in_block = False
+
+    result.mermaid_count = mermaid_count
+    result.code_block_count = code_block_count
+
+    if mermaid_count == 0:
+        result.issues.append(Issue(
+            severity=Severity.WARNING,
+            section="Diagrams",
+            message="No Mermaid diagrams found — the FSD should use Mermaid for state diagrams, flowcharts, and sequence diagrams",
+        ))
+
+
 def check_requirement_ids(content: str, lines: list[str], result: ValidationResult):
-    ids = REQ_ID_PATTERN.findall(content)
-    full_ids = re.findall(r"\b(?:FR|NFR|UC|BR|IO|EI)-[\d]+(?:\.[\d]+)*\b", content)
+    full_ids = re.findall(r"\b(?:FR|NFR|UC|BR|UI)-[\d]+(?:\.[\d]+)*\b", content)
     result.requirement_ids = sorted(set(full_ids))
 
     if not full_ids:
@@ -284,11 +347,11 @@ def check_acceptance_criteria(content: str, lines: list[str], result: Validation
 
 
 def check_cross_references(content: str, result: ValidationResult):
-    all_ids = set(re.findall(r"\b(?:FR|NFR|UC|BR|IO|EI)-[\d]+(?:\.[\d]+)*\b", content))
+    all_ids = set(re.findall(r"\b(?:FR|NFR|UC|BR|UI)-[\d]+(?:\.[\d]+)*\b", content))
     result.cross_references = sorted(all_ids)
 
     defined_pattern = re.compile(
-        r"(?:\*\*ID\*\*\s*[:\|]\s*|#{2,5}\s+)((?:FR|NFR|UC|BR|IO|EI)-[\d]+(?:\.[\d]+)*)"
+        r"(?:\*\*ID\*\*\s*[:\|]\s*|#{2,5}\s+)((?:FR|NFR|UC|BR|UI)-[\d]+(?:\.[\d]+)*)"
     )
     defined_ids = set(defined_pattern.findall(content))
 
@@ -379,7 +442,9 @@ def validate(path: Path, strict: bool = False) -> ValidationResult:
 
     sections = extract_sections(lines)
     check_required_sections(sections, result)
+    check_excluded_sections(sections, result)
     check_empty_sections(lines, result)
+    check_code_blocks(content, lines, result)
     check_requirement_ids(content, lines, result)
     check_moscow_priorities(content, lines, result)
     check_acceptance_criteria(content, lines, result)
@@ -412,6 +477,9 @@ def print_report(result: ValidationResult, use_json: bool = False):
     print(f"  Warnings: {result.warning_count}")
     print(f"  Sections found: {len(result.sections_found)}")
     print(f"  Requirement IDs found: {len(result.requirement_ids)}")
+    print(f"  Mermaid diagrams: {result.mermaid_count}")
+    if result.code_block_count > 0:
+        print(f"  ⚠ Non-Mermaid code blocks: {result.code_block_count}")
     print()
 
     if result.issues:
