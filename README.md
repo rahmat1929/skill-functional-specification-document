@@ -6,21 +6,6 @@ Every generated FSD follows a structured 8-section template with MoSCoW prioriti
 
 ---
 
-## Content Rules
-
-All generated FSDs follow these strict content rules:
-
-| Rule | Description |
-|------|-------------|
-| **No code samples** | Only explanations, conceptual descriptions, and structured information |
-| **No code blocks** | The only permitted fenced blocks are Mermaid diagrams |
-| **"What" and "why" focus** | Developer-friendly language focused on system behavior and business rationale |
-| **Architecture first** | Prioritize system relationships and module interactions over implementation details |
-| **Mermaid exclusively** | All diagrams (flowcharts, sequences, state machines) use Mermaid format |
-| **Exclude API & Database** | API endpoints and database schemas belong in separate companion documents |
-
----
-
 ## Installation
 
 ```bash
@@ -53,7 +38,7 @@ If it responds by asking clarifying questions or generating an FSD with Mermaid 
 
 ## Skill Contents
 
-```
+```text
 functional-specification-document/
 ├── SKILL.md                        # Main skill instructions & workflow
 ├── README.md                       # This file
@@ -123,6 +108,8 @@ A focused FSD with Mermaid sequence diagram for the reset flow, state diagram fo
 
 ### Example 4: Casual phrasing (still triggers)
 
+**Prompt:**
+
 > "Write up how the checkout flow should behave, step by step, with all the edge cases."
 
 > "Document the requirements for our notification service."
@@ -131,7 +118,24 @@ A focused FSD with Mermaid sequence diagram for the reset flow, state diagram fo
 
 ---
 
-### Example 5: Validate an existing FSD
+## Output Document Structure
+
+| # | Section | Contents |
+|---|---------|----------|
+| 1 | **Introduction** | Purpose, scope, definitions & acronyms, references, document conventions (SHALL/SHOULD/MAY) |
+| 2 | **Product Overview** | Product perspective (with Mermaid context diagram), high-level functions, user classes, operating environment, constraints, assumptions & dependencies |
+| 3 | **Functional Requirements** | Feature breakdown with IDs (FR-X.Y.Z), descriptions, MoSCoW priority, acceptance criteria (GIVEN/WHEN/THEN), business rules; use cases with Mermaid sequence diagrams; feature interaction maps |
+| 4 | **User Interface Requirements** | Screen inventory, navigation flow (Mermaid flowchart), screen descriptions, accessibility requirements |
+| 5 | **Non-Functional Requirements** | Performance (measurable targets), security, reliability & availability (RTO/RPO), scalability, maintainability |
+| 6 | **System Behavior & Error Handling** | State diagrams (Mermaid stateDiagram), error handling matrix, edge cases, critical flow diagrams (Mermaid flowchart) |
+| 7 | **Approval & Sign-Off** | Stakeholder sign-off table, revision history |
+| 8 | **Appendices** | Supplementary Mermaid diagrams, wireframe references, glossary |
+
+**Excluded by design:** API endpoint catalogs, database schemas, data dictionaries — these belong in companion API Specification and Database Design documents.
+
+---
+
+## Validation Checks & Scripts
 
 ```bash
 python .agents/skills/functional-specification-document/scripts/validate_fsd.py docs/FSD-Payment.md
@@ -139,7 +143,7 @@ python .agents/skills/functional-specification-document/scripts/validate_fsd.py 
 
 **Sample output:**
 
-```
+```text
 ============================================================
   FSD Validation Report
 ============================================================
@@ -162,27 +166,6 @@ python .agents/skills/functional-specification-document/scripts/validate_fsd.py 
 
 Use `--strict` to treat warnings as errors, or `--json` for CI/CD integration.
 
----
-
-## Output Document Structure
-
-| # | Section | Contents |
-|---|---------|----------|
-| 1 | **Introduction** | Purpose, scope, definitions & acronyms, references, document conventions (SHALL/SHOULD/MAY) |
-| 2 | **Product Overview** | Product perspective (with Mermaid context diagram), high-level functions, user classes, operating environment, constraints, assumptions & dependencies |
-| 3 | **Functional Requirements** | Feature breakdown with IDs (FR-X.Y.Z), descriptions, MoSCoW priority, acceptance criteria (GIVEN/WHEN/THEN), business rules; use cases with Mermaid sequence diagrams; feature interaction maps |
-| 4 | **User Interface Requirements** | Screen inventory, navigation flow (Mermaid flowchart), screen descriptions, accessibility requirements |
-| 5 | **Non-Functional Requirements** | Performance (measurable targets), security, reliability & availability (RTO/RPO), scalability, maintainability |
-| 6 | **System Behavior & Error Handling** | State diagrams (Mermaid stateDiagram), error handling matrix, edge cases, critical flow diagrams (Mermaid flowchart) |
-| 7 | **Approval & Sign-Off** | Stakeholder sign-off table, revision history |
-| 8 | **Appendices** | Supplementary Mermaid diagrams, wireframe references, glossary |
-
-**Excluded by design:** API endpoint catalogs, database schemas, data dictionaries — these belong in companion API Specification and Database Design documents.
-
----
-
-## Validation Checks
-
 | Check | Severity | What it catches |
 |-------|----------|----------------|
 | Required sections | Error | Missing top-level sections from the 8-section structure |
@@ -197,6 +180,21 @@ Use `--strict` to treat warnings as errors, or `--json` for CI/CD integration.
 | Acceptance criteria | Warning/Error | Requirements without GIVEN/WHEN/THEN |
 | Cross-reference integrity | Warning | Referenced IDs never formally defined |
 | NFR measurability | Warning | Vague adjectives instead of measurable targets |
+
+---
+
+## Content Rules
+
+All generated FSDs follow these strict content rules:
+
+| Rule | Description |
+|------|-------------|
+| **No code samples** | Only explanations, conceptual descriptions, and structured information |
+| **No code blocks** | The only permitted fenced blocks are Mermaid diagrams |
+| **"What" and "why" focus** | Developer-friendly language focused on system behavior and business rationale |
+| **Architecture first** | Prioritize system relationships and module interactions over implementation details |
+| **Mermaid exclusively** | All diagrams (flowcharts, sequences, state machines) use Mermaid format |
+| **Exclude API & Database** | API endpoints and database schemas belong in separate companion documents |
 
 ---
 
@@ -223,16 +221,22 @@ The FSD is one part of a complete specification pipeline. It references but does
 
 ---
 
-## License
+## Supported Platforms
 
-MIT
+| Platform | Status |
+|---|---|
+| Claude | ✅ |
+| ChatGPT | ✅ |
+| Gemini | ✅ |
 
 ---
 
-## Contributing
+## Requirements
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/improvement`)
-3. Commit your changes (`git commit -m "Add improvement"`)
-4. Push to the branch (`git push origin feature/improvement`)
-5. Open a Pull Request
+- Python 3.10+ (for validator script, no pip dependencies required)
+
+---
+
+## License
+
+MIT
