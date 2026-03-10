@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.2.0] - 2026-03-10
+
+### Added
+- **Business Requirements Document (BRD) Support** — The skill can now generate BRDs in addition to FSDs.
+- **references/brd-template.md** — New 7-section template for BRDs focusing on business goals, scope, stakeholders, and high-level requirements.
+- **SKILL.md** — Updated instructions to detect when a user needs a BRD vs FSD and route them to the appropriate template.
+- **README.md** — Updated documentation to reflect the new dual-document capability.
+
+---
+
 ## [1.1.0] - 2026-03-05
 
 ### Changed — Content Rules Overhaul

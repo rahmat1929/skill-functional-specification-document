@@ -1,16 +1,17 @@
 ---
 name: functional-specification-document
-description: Generate a comprehensive Functional Specification Document (FSD) from project requirements, PRDs, briefs, or interactive interviews. Use this skill whenever the user mentions functional specs, FSD, software specification, feature specification, system specification, functional requirements document, or wants to document how a system should behave before implementation. Also trigger when users ask to "spec out" a feature, write up requirements, or create a detailed plan for developers to build from — even if they don't use the term "functional specification" explicitly.
+description: Generate a comprehensive Business Requirements Document (BRD) or Functional Specification Document (FSD) from project requirements, PRDs, briefs, or interactive interviews. Use this skill whenever the user mentions BRD, business requirements, functional specs, FSD, software specification, feature specification, system specification, functional requirements document, or wants to document business needs or how a system should behave. Also trigger when users ask to "spec out" a feature, write up requirements, or create a detailed plan for stakeholders or developers — even if they don't use the exact terms explicitly.
 ---
 
-# Functional Specification Document Generator
+# Requirements & Functional Specification Document Generator
 
-This skill produces structured, implementation-ready Functional Specification Documents. An FSD bridges the gap between what stakeholders want (captured in a PRD or brief) and what engineers need to build. It answers "what does the system do and how should it behave?" without dictating internal architecture.
+This skill produces structured Business Requirements Documents (BRDs) and implementation-ready Functional Specification Documents (FSDs). A BRD defines the business problem, goals, stakeholders, and high-level business rules. An FSD bridges the gap between what stakeholders want and what engineers need to build. It answers "what does the system do and how should it behave" without dictating internal architecture.
 
 ## Content Rules
 
-These rules govern every FSD this skill produces. Follow them strictly:
+These rules govern every document this skill produces. Follow them strictly:
 
+- **Distinguish Document Types** — Know whether you are writing a BRD or an FSD. The BRD focuses on business priorities (the "why" and "what"), stricly avoiding technical constraints and implementation details. The FSD focuses on system behavior (the "how it behaves") translating those constraints to actionable scopes that developers understand.
 - **NO CODE SAMPLES** — Provide only explanations, conceptual descriptions, and structured information. Never include source code, pseudo-code, or implementation snippets.
 - **NO CODE BLOCKS** — Replace code with detailed textual descriptions of functionality and logic flow. The only permitted fenced blocks are Mermaid diagrams.
 - **"What" and "why", not "how"** — Use clear, developer-friendly language that focuses on system behavior and business rationale, not implementation mechanics.
@@ -20,10 +21,11 @@ These rules govern every FSD this skill produces. Follow them strictly:
 
 ## When to use this skill
 
-- A user wants to create a functional specification for a new product, feature, or system
-- A user has a PRD, project brief, or set of requirements and needs them turned into a detailed spec
-- A user asks to "spec out" or "write up" how something should work
-- A user needs to document functional requirements, use cases, or acceptance criteria
+- A user wants to define the business goals and high-level requirements for an initiative (BRD)
+- A user wants to create a functional specification for a new product, feature, or system (FSD)
+- A user has a PRD, project brief, or set of requirements and needs them turned into a detailed BRD or FSD
+- A user asks to "spec out" or "write up" how something should work or what it should achieve
+- A user needs to document business goals, functional requirements, use cases, or acceptance criteria
 
 ## Workflow
 
@@ -46,9 +48,9 @@ Walk through these questions to build a mental model of the system:
 
 Don't ask all questions at once — use the first couple of answers to tailor follow-ups. The goal is to get enough information to write a solid first draft, not to exhaustively document everything upfront.
 
-### Phase 2: Write the FSD
+### Phase 2: Write the Document
 
-Read `references/fsd-template.md` for the full document template and section-by-section guidance. Follow that template structure, but adapt it to the project — skip sections that genuinely don't apply and expand sections that need more depth.
+Determine if the user needs a BRD (business focus) or an FSD (system behavior focus). Read `references/brd-template.md` (for BRDs) or `references/fsd-template.md` (for FSDs) for the full document template and section-by-section guidance. Follow that template structure, but adapt it to the project — skip sections that genuinely don't apply and expand sections that need more depth.
 
 **Key principles while writing:**
 
@@ -62,7 +64,7 @@ Read `references/fsd-template.md` for the full document template and section-by-
 
 ### Phase 3: Output
 
-Save the FSD as a Markdown file. Use the naming convention: `FSD-[Project-Name].md`
+Save the document as a Markdown file. Use the naming convention: `BRD-[Project-Name].md` or `FSD-[Project-Name].md`.
 
 After generating the document, run the validation script to check structural completeness. The script validates required sections, requirement ID format, acceptance criteria presence, MoSCoW labels, Mermaid diagram presence, and flags any code blocks that shouldn't be there.
 
@@ -79,7 +81,18 @@ Incorporate feedback and regenerate. Each revision should re-run validation.
 
 ## Document Structure Summary
 
-The full FSD follows this top-level structure (see `references/fsd-template.md` for details):
+### Business Requirements Document (BRD)
+The BRD follows this top-level structure (see `references/brd-template.md` for details):
+1. **Executive Summary** — Purpose, background, and problem statement
+2. **Business Goals & Objectives** — Project goals and success metrics (KPIs)
+3. **Project Scope** — In scope and out of scope
+4. **Stakeholders** — Roles, influence, and responsibilities
+5. **Business Requirements** — High-level requirements mapped to MoSCoW priorities and business rules
+6. **Assumptions, Constraints & Dependencies**
+7. **Glossary of Terms**
+
+### Functional Specification Document (FSD)
+The FSD follows this top-level structure (see `references/fsd-template.md` for details):
 
 1. **Introduction** — Purpose, scope, definitions, references, conventions
 2. **Product Overview** — Context, high-level functions, users, environment, constraints, assumptions
@@ -94,15 +107,14 @@ The full FSD follows this top-level structure (see `references/fsd-template.md` 
 
 Before delivering the final FSD, mentally verify:
 
-- [ ] Every requirement has a unique ID
-- [ ] Every requirement has a priority (Must/Should/Could/Won't)
-- [ ] Every feature has testable acceptance criteria
-- [ ] Use cases cover main flow + at least one alternative/error flow
-- [ ] Error handling is specified for user-facing operations
-- [ ] Non-functional requirements have measurable targets (not vague adjectives)
+- [ ] Every requirement has a unique ID and priority (MoSCoW)
+- [ ] (FSD only) Every feature has testable acceptance criteria
+- [ ] (FSD only) Use cases cover main flow + at least one alternative/error flow
+- [ ] (FSD only) Error handling is specified for user-facing operations
+- [ ] (FSD only) Non-functional requirements have measurable targets
 - [ ] No section is left as a placeholder or TODO
 - [ ] Cross-references between sections are consistent
 - [ ] All diagrams use Mermaid format (no code blocks, no ASCII art)
 - [ ] No code samples or code blocks appear anywhere in the document
 - [ ] No API endpoint definitions or database schemas are included
-- [ ] The document can be handed to a developer who has never seen the project and they could start building
+- [ ] The document serves its audience correctly (BRD for business stakeholders, FSD for developers/QA).

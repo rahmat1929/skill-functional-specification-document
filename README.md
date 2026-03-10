@@ -1,8 +1,8 @@
-# Functional Specification Document (FSD)
+# Requirements & Functional Specification Document Generator
 
-An agent skill that generates comprehensive, implementation-ready Functional Specification Documents. It defines system functionality, business rules, user interactions, acceptance criteria, and error handling — focusing on **what** the system must do and **why**, not how to build it.
+An agent skill that generates structured Business Requirements Documents (BRDs) and implementation-ready Functional Specification Documents (FSDs). It defines business goals, functional requirements, user interactions, acceptance criteria, and error handling — focusing on **what** the system must do and **why**, not how to build it.
 
-Every generated FSD follows a structured 8-section template with MoSCoW prioritization, GIVEN/WHEN/THEN acceptance criteria, hierarchical requirement IDs (FR-X.Y.Z), and Mermaid diagrams for all visual representations.
+Every generated FSD follows a structured 8-section template with MoSCoW prioritization, GIVEN/WHEN/THEN acceptance criteria, hierarchical requirement IDs (FR-X.Y.Z), and Mermaid diagrams for all visual representations. BRDs follow a 7-section template focusing on business goals, stakeholders, scope, and high-level business rules.
 
 ---
 
@@ -30,7 +30,7 @@ cp -r skill-functional-specification-document/ .agents/skills/functional-specifi
 
 Ask the agent:
 
-> "Create a functional spec for the authentication module"
+> "Create a functional spec for the authentication module" or "Write a BRD for the new onboarding flow"
 
 If it responds by asking clarifying questions or generating an FSD with Mermaid diagrams, the skill is active.
 
@@ -44,6 +44,7 @@ functional-specification-document/
 ├── README.md                       # This file
 ├── CHANGELOG.md                    # Version history
 ├── references/
+│   ├── brd-template.md             # Complete BRD template
 │   └── fsd-template.md             # Complete FSD template (8 sections) with Mermaid examples
 └── scripts/
     └── validate_fsd.py             # Automated FSD structural validator
@@ -56,8 +57,8 @@ functional-specification-document/
 | Phase | What happens |
 |-------|-------------|
 | **1. Gather Context** | Reads your PRD/brief or runs an interactive interview to understand the system |
-| **2. Write the FSD** | Generates a full document following the 8-section template with requirement IDs, acceptance criteria, priority labels, and Mermaid diagrams |
-| **3. Output & Validate** | Saves as `FSD-[Project-Name].md` and runs validation to check structure, content rules compliance, and Mermaid diagram presence |
+| **2. Write the Document** | Generates a full document following the respective template (BRD or FSD) with requirement IDs, priority labels, and diagrams if applicable |
+| **3. Output & Validate** | Saves as `BRD-[Project-Name].md` or `FSD-[Project-Name].md` and runs validation (for FSDs) to check structure and rules |
 | **4. Review & Iterate** | Presents the draft with flagged assumptions, incorporates feedback, re-validates |
 
 ---
@@ -119,6 +120,20 @@ A focused FSD with Mermaid sequence diagram for the reset flow, state diagram fo
 ---
 
 ## Output Document Structure
+
+### Business Requirements Document (BRD)
+
+| # | Section | Contents |
+|---|---------|----------|
+| 1 | **Executive Summary** | Purpose, background, and problem statement |
+| 2 | **Business Goals & Objectives** | Project goals and success metrics (KPIs) |
+| 3 | **Project Scope** | In scope and out of scope |
+| 4 | **Stakeholders** | Roles, influence, and responsibilities |
+| 5 | **Business Requirements** | High-level requirements mapped to MoSCoW priorities and business rules |
+| 6 | **Assumptions, Constraints & Dependencies** | Factors believed to be true, limitations, and external reliance |
+| 7 | **Glossary of Terms** | Definitions of business-specific jargon and acronyms |
+
+### Functional Specification Document (FSD)
 
 | # | Section | Contents |
 |---|---------|----------|
